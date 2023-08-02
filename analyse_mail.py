@@ -28,3 +28,14 @@ def loof_for_date(email_body):
 
     return False, None
 
+def loof_for_text(email_body, text):
+    # Utilisez re.escape pour échapper les caractères spéciaux dans le motif
+    escaped_text = re.escape(text)
+
+    # Créez un motif en utilisant le texte échappé
+    pattern = fr'\b{escaped_text}\b'
+
+    # Recherche du motif de texte dans le corps de l'e-mail
+    matches = re.findall(pattern, email_body, re.IGNORECASE)
+
+    return len(matches) > 0
