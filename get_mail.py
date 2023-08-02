@@ -3,25 +3,22 @@ import email
 from email.header import decode_header
 
 
-def get_mails(email_address, password, limite=100):
+def get_mails(email_address, password, limite=1):
 
     # Connexion au serveur IMAP de Gmail
     mail = verifier_connexion(email_address, password)
-    # if mail is not None:
-    #     mail.login(email_address, password)
 
-    # Sélection de la boîte de réception (INBOX)
-    mail.select("inbox")
+    # Sélection de tous les emails
+    mailbox_name = '"[Gmail]/Tous les messages"'
+    mail.select(mailbox_name)
 
     # Recherche des e-mails non lus
-    status, messages = mail.search(None, "(ALL)")
+    status, messages = mail.search(None, "ALL")
 
+    print("Récupération des messages")
     # Liste des identifiants d'e-mails non lus
     email_ids = messages[0].split()
-
-    # Limiter à 100 premiers e-mails
-    if len(email_ids) > 100:
-        email_ids = email_ids[:100]
+    print(len(email_ids), " messages récupérés")
 
     # Limiter au nombre spécifié d'e-mails
     if limite is not None and len(email_ids) > limite:
@@ -45,9 +42,25 @@ def get_mails(email_address, password, limite=100):
         # De qui l'e-mail provient
         from_ = msg.get("From")
 
+        # Date d'envoi de l'e-mail
+        date_sent = msg.get("Date")
+
+        # Corps de l'e-mail
+        body = ""
+        if msg.is_multipart():
+            for part in msg.walk():
+                content_type = part.get_content_type()
+                if content_type == "text/plain":
+                    body = part.get_payload(decode=True).decode('iso-8859-1', errors='replace')
+                    break
+        else:
+            body = msg.get_payload(decode=True).decode('iso-8859-1', errors='replace')
+
         emails.append({
             "sujet": subject,
-            "de": from_
+            "de": from_,
+            "date": date_sent,
+            "corps": body
         })
 
     # Déconnexion
