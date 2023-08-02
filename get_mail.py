@@ -18,15 +18,18 @@ def get_mails(email_address, password, limite=1):
     print("Récupération des messages")
     # Liste des identifiants d'e-mails non lus
     email_ids = messages[0].split()
-    print(len(email_ids), " messages récupérés")
+    print(len(email_ids), "messages récupérés")
 
     # Limiter au nombre spécifié d'e-mails
     if limite is not None and len(email_ids) > limite:
-        email_ids = email_ids[:limite]
+        email_ids = email_ids[-(limite):]
 
     emails = []
 
+    print("Récupération du contenu des emails ...")
+    print("id des emails", end=" :")
     for email_id in email_ids:
+        print(email_id, end=", ")
         # Récupération du message
         status, msg_data = mail.fetch(email_id, "(RFC822)")
         raw_email = msg_data[0][1]
@@ -51,10 +54,10 @@ def get_mails(email_address, password, limite=1):
             for part in msg.walk():
                 content_type = part.get_content_type()
                 if content_type == "text/plain":
-                    body = part.get_payload(decode=True).decode('iso-8859-1', errors='replace')
+                    body = part.get_payload(decode=True).decode('utf-8', errors='replace')
                     break
         else:
-            body = msg.get_payload(decode=True).decode('iso-8859-1', errors='replace')
+            body = msg.get_payload(decode=True).decode('utf-8', errors='replace')
 
         emails.append({
             "sujet": subject,
